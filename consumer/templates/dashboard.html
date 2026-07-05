@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UPI Fraud AI Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta http-equiv="refresh" content="3">
+</head>
+
+<body class="bg-gray-900 text-white p-6">
+
+<h1 class="text-3xl font-bold mb-6 text-center">
+🚨 AI Fraud Detection Dashboard
+</h1>
+
+<!-- Stats -->
+<div class="grid grid-cols-3 gap-4 mb-6">
+
+    <div class="bg-gray-800 p-4 rounded">
+        <h2>Total Transactions</h2>
+        <p class="text-2xl font-bold">{{ total }}</p>
+    </div>
+
+    <div class="bg-red-700 p-4 rounded">
+        <h2>Fraud Cases</h2>
+        <p class="text-2xl font-bold">{{ fraud }}</p>
+    </div>
+
+    <div class="bg-green-700 p-4 rounded">
+        <h2>Safe Transactions</h2>
+        <p class="text-2xl font-bold">{{ total - fraud }}</p>
+    </div>
+
+</div>
+
+<!-- Table -->
+<div class="overflow-x-auto">
+<table class="w-full bg-gray-800 rounded">
+
+<thead>
+<tr class="bg-gray-700">
+    <th class="p-2">Amount</th>
+    <th class="p-2">Time</th>
+    <th class="p-2">Prediction</th>
+    <th class="p-2">Fraud %</th>
+    <th class="p-2">Top Feature</th>
+    <th class="p-2">Risk</th>
+    <th class="p-2">Explanation</th>
+    <th class="p-2">SHAP</th>
+</tr>
+</thead>
+
+<tbody>
+{% for txn in transactions %}
+<tr class="border-t border-gray-700">
+
+<td class="p-2">{{ txn.amount }}</td>
+<td class="p-2">{{ txn.time }}</td>
+
+<td class="p-2">
+    {% if txn.prediction == 1 %}
+        <span class="bg-red-600 px-2 py-1 rounded">Fraud</span>
+    {% else %}
+        <span class="bg-green-600 px-2 py-1 rounded">Safe</span>
+    {% endif %}
+</td>
+
+<td class="p-2 font-bold">{{ txn.probability }}%</td>
+
+<td class="p-2 text-yellow-400 font-semibold">
+    {{ txn.top_feature }}
+</td>
+
+<td class="p-2">
+    {% if txn.risk == "High" %}
+        <span class="bg-red-700 px-2 py-1 rounded">High</span>
+    {% elif txn.risk == "Medium" %}
+        <span class="bg-yellow-500 px-2 py-1 rounded">Medium</span>
+    {% else %}
+        <span class="bg-green-600 px-2 py-1 rounded">Low</span>
+    {% endif %}
+</td>
+
+<td class="p-2 text-sm text-gray-300">
+    {{ txn.reason }}
+</td>
+
+<td class="p-2">
+    {% if txn.shap_graph %}
+        <img src="{{ txn.shap_graph }}" width="120" class="rounded">
+    {% endif %}
+</td>
+
+</tr>
+{% endfor %}
+</tbody>
+
+</table>
+</div>
+
+</body>
+</html>

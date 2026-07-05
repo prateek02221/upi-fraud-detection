@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-base text-text font-body;
+  font-feature-settings: 'tnum' 1;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Leaflet dark-theme overrides */
+.leaflet-container {
+  background: #0b0f17 !important;
+}
+.leaflet-control-attribution {
+  background: rgba(11, 15, 23, 0.7) !important;
+  color: #7c8ba8 !important;
+}
+.leaflet-control-attribution a {
+  color: #a8b4cc !important;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+.pulse-ring {
+  animation: pulse-ring 1.8s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #141b29;
+}
+::-webkit-scrollbar-thumb {
+  background: #26314a;
+  border-radius: 8px;
+}

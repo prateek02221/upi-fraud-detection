@@ -1,0 +1,52 @@
+services:
+  # Flask JSON API — serves /api/data to the React frontend
+  - type: web
+    name: upi-fraud-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn consumer.app:app
+    envVars:
+      - key: MONGO_URI
+        sync: false          # paste your MongoDB Atlas connection string
+      - key: RABBITMQ_URL
+        sync: false          # paste your CloudAMQP connection string
+
+  # Generator worker — publishes simulated UPI transactions to RabbitMQ
+  - type: worker
+    name: upi-fraud-generator
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python generator/generate.py
+    envVars:
+      - key: RABBITMQ_URL
+        sync: false
+
+  # Consumer worker — scores transactions (model + SHAP) and writes to Atlas
+  - type: worker
+    name: upi-fraud-consumer
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python consumer/consumer.py
+    envVars:
+      - key: RABBITMQ_URL
+        sync: false
+      - key: MONGO_URI
+        sync: false
+
+  # React dashboard — static site, built separately (see dashboard-frontend/)
+  - type: web
+    name: upi-fraud-dashboard
+    env: static
+    buildCommand: cd dashboard-frontend && npm install && npm run build
+    staticPublishPath: dashboard-frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false          # set to the upi-fraud-api service's URL
+    routes:
+      # SPA rewrite: without this, deep links like /transactions or a
+      # browser refresh on any non-root route 404 on Render's static
+      # host, since there's no matching file at that path — only
+      # index.html, which client-side React Router then takes over from.
+      - type: rewrite
+        source: /*
+        destination: /index.html

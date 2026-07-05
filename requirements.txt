@@ -1,0 +1,11 @@
+flask
+flask-cors
+python-dotenv
+gunicorn
+pika
+pandas
+scikit-learn
+shap
+pymongo
+joblib
+matplotlib
