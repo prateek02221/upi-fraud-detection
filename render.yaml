@@ -11,22 +11,28 @@ services:
       - key: RABBITMQ_URL
         sync: false          # paste your CloudAMQP connection string
 
-  # Generator worker — publishes simulated UPI transactions to RabbitMQ
-  - type: worker
+  # Generator — publishes simulated UPI transactions to RabbitMQ.
+  # Declared as `web` (not `worker`) so it's free-tier eligible: Render
+  # removed free background workers in 2026. The actual generator loop
+  # runs in a background thread; gunicorn just serves a health-check route.
+  # --workers 1 is required — more workers would each spawn their own
+  # duplicate generator thread, producing multiple transactions per tick.
+  - type: web
     name: upi-fraud-generator
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python generator/generate.py
+    startCommand: gunicorn --workers 1 --threads 2 generator.generate:app
     envVars:
       - key: RABBITMQ_URL
         sync: false
 
-  # Consumer worker — scores transactions (model + SHAP) and writes to Atlas
-  - type: worker
+  # Consumer — scores transactions (model + SHAP) and writes to Atlas.
+  # Same free-tier workaround as the generator above.
+  - type: web
     name: upi-fraud-consumer
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python consumer/consumer.py
+    startCommand: gunicorn --workers 1 --threads 2 consumer.consumer:app
     envVars:
       - key: RABBITMQ_URL
         sync: false

@@ -2,8 +2,10 @@ import pika
 import json
 import time
 import os
+import threading
 from datetime import datetime, timezone
 from dotenv import load_dotenv
+from flask import Flask, jsonify
 
 from model.predict import predict
 from explainability.shap_explainer import explain
@@ -13,6 +15,12 @@ load_dotenv()  # loads .env from project root, if present
 
 RABBITMQ_URL = os.environ.get("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/%2F")
 QUEUE_NAME = "transactions"
+
+# Same reasoning as generator/generate.py: wrapped in Flask so this can
+# deploy as a Render "Web Service" (free-tier eligible) rather than a
+# "Background Worker" (paid-only). Real consumer loop runs in a thread.
+app = Flask(__name__)
+_stats = {"processed": 0, "last_txn": None, "last_risk": None}
 
 
 def connect():
@@ -59,6 +67,9 @@ def callback(ch, method, properties, body):
 
         save(txn)
         print("Processed:", txn["transaction_id"], txn["risk"])
+        _stats["processed"] += 1
+        _stats["last_txn"] = txn["transaction_id"]
+        _stats["last_risk"] = txn["risk"]
 
         ch.basic_ack(delivery_tag=method.delivery_tag)
     except Exception as e:
@@ -90,5 +101,33 @@ def main():
             )
 
 
+@app.route("/")
+def health():
+    return jsonify({
+        "status": "ok",
+        "service": "upi-fraud-consumer",
+        "transactions_processed": _stats["processed"],
+        "last_transaction_id": _stats["last_txn"],
+        "last_risk": _stats["last_risk"],
+    })
+
+
+_worker_started = False
+_worker_lock = threading.Lock()
+
+
+def start_worker_once():
+    """Starts the consumer loop in a background thread exactly once,
+    even if Flask/gunicorn imports this module more than once."""
+    global _worker_started
+    with _worker_lock:
+        if not _worker_started:
+            threading.Thread(target=main, daemon=True).start()
+            _worker_started = True
+
+
+start_worker_once()
+
 if __name__ == "__main__":
-    main()
+    port = int(os.environ.get("PORT", 5002))
+    app.run(host="0.0.0.0", port=port)
