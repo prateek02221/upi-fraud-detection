@@ -2,12 +2,12 @@
 
 A real-time transaction monitoring pipeline that simulates UPI (Unified Payments Interface) transactions, scores each one for fraud using a machine learning model, explains *why* using SHAP, and streams the results into a live React dashboard.
 
-<!--
-  Add your own screenshots to docs/screenshots/ and reference them here, e.g.:
-  ![Dashboard Overview](docs/screenshots/dashboard.png)
-  ![SHAP Explanation Modal](docs/screenshots/shap-modal.png)
-  A short demo GIF here is even more effective than static screenshots.
--->
+![Dashboard Demo](docs/screenshots/demo.gif)
+
+![Dashboard Overview](docs/screenshots/dashboard.png)
+![Explainable AI](docs/screenshots/explainable-ai.png)
+![SHAP Explanation Modal](docs/screenshots/shap-modal.png)
+![ML Model Performance](docs/screenshots/ml-model-performance.png)
 
 ## What it does
 
