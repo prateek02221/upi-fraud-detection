@@ -1,0 +1,10 @@
+{
+  "accuracy": 0.7383,
+  "precision": 0.6735,
+  "recall": 0.5335,
+  "f1_score": 0.5954,
+  "train_samples": 4800,
+  "test_samples": 1200,
+  "trained_at": "2026-07-05T15:06:29Z",
+  "note": "Computed on a held-out test split of a synthetic dataset. Not live production accuracy \u2014 this pipeline has no verified ground-truth labels for real transactions."
+}

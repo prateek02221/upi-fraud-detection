@@ -2,11 +2,24 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from datetime import datetime, timezone, timedelta
 from collections import defaultdict
+import json
+import os
 
 from database.db import collection
 
 app = Flask(__name__)
 CORS(app)  # frontend is a separate React app (different origin)
+
+# Loaded once at startup from model/metrics.json, produced by model/train.py
+# on a real held-out test split. These are genuine offline validation
+# metrics — NOT live production accuracy, which this pipeline can't compute
+# without verified ground-truth labels on real transactions.
+_METRICS_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "model", "metrics.json")
+try:
+    with open(_METRICS_PATH) as f:
+        OFFLINE_MODEL_METRICS = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
+    OFFLINE_MODEL_METRICS = None
 
 
 def serialize(txn):
@@ -218,6 +231,7 @@ def api_data():
         "fraud_patterns": fraud_patterns,
         "time_heatmap": time_heatmap,
         "live_metrics": live_metrics,
+        "offline_model_metrics": OFFLINE_MODEL_METRICS,
         "system_status": system_status,
         "volume_series": volume_series,
         "recent_transactions": recent_transactions,

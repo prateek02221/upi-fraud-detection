@@ -46,8 +46,10 @@ Generator  --->  RabbitMQ  --->  Consumer  --->  MongoDB Atlas  --->  Flask API 
 This is a learning/demo project, and the README says so rather than dressing it up:
 
 - **The model only uses two features: `amount` and `time`.** It cannot detect device anomalies, location velocity, or multi-transaction patterns — those would need session/history features this pipeline doesn't collect.
-- **No real Accuracy / Precision / Recall / F1.** The model (`model/train.py`) is trained on 4 hardcoded example rows with no held-out test set, so there's no genuine validation data. The "ML Model Performance" page reports live confidence/throughput metrics computed from the actual prediction stream instead of fabricating validation metrics that don't exist.
 - **Synthetic data.** Transactions are randomly generated, not real UPI data — this is a pipeline/architecture demo, not a production fraud system.
+- **"ML Model Performance" shows two different kinds of metrics, and is explicit about which is which:**
+  - *Offline validation metrics* (Accuracy/Precision/Recall/F1) — genuinely computed on a held-out test split (`model/train.py`), from a synthetic-but-probabilistic dataset (fraud isn't perfectly separable by amount/time alone, so these numbers are realistic — not a suspicious 100%).
+  - *Live model signals* (confidence, throughput) — computed from the actual real-time prediction stream. These are shown separately from the offline metrics above because the pipeline has no verified ground-truth labels for real-time transactions, so live "accuracy" isn't something it can honestly claim.
 
 ## Running it locally
 

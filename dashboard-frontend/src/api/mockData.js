@@ -138,6 +138,17 @@ export function makeMockPayload(previous) {
     api_gateway: 'Active',
   }
 
+  const offlineModelMetrics = {
+    accuracy: 0.7383,
+    precision: 0.6735,
+    recall: 0.5335,
+    f1_score: 0.5954,
+    train_samples: 4800,
+    test_samples: 1200,
+    trained_at: new Date().toISOString(),
+    note: 'Computed on a held-out test split of a synthetic dataset. Not live production accuracy.',
+  }
+
   return {
     kpis: {
       total,
@@ -157,6 +168,7 @@ export function makeMockPayload(previous) {
     fraud_patterns: fraudPatterns,
     time_heatmap: timeHeatmap,
     live_metrics: liveMetrics,
+    offline_model_metrics: offlineModelMetrics,
     system_status: systemStatus,
     volume_series: volumeSeries,
     recent_transactions: newTxns,
